@@ -29,7 +29,7 @@ export const register = async (req: Request, res: Response) => {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    const token = generateToken({ userWithoutPassword });
+    const token = generateToken({ ...userWithoutPassword });
 
     res.status(201).json({ token });
   } catch (err) {
@@ -61,7 +61,7 @@ export const login = async (req: Request, res: Response) => {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    const token = generateToken({ userWithoutPassword });
+    const token = generateToken({ ...userWithoutPassword });
 
     res.status(200).json({ token });
   } catch (err) {

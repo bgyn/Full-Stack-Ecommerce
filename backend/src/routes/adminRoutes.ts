@@ -9,7 +9,7 @@ router.get("/dashboard", restrictTo(["ADMIN"]), (req, res) => {
   });
 });
 
-router.get("/products", restrictTo(["ADMIN"]), (req, res) => {
+router.get("/products/add", restrictTo(["ADMIN"]), (req, res) => {
   return res.render("addProducts");
 });
 

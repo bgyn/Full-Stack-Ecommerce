@@ -57,13 +57,13 @@ model Profile {
 }
 
 model Product {
-  id                Int                 @id @default(autoincrement())
-  name              String
-  description       String
-  createdAt         DateTime            @default(now()) @map("created_at")
-  updatedAt         DateTime            @updatedAt @map("updated_at")
-  ProductVariants   ProductVariants[]
-  ProductCategories ProductCategories[]
+  id              Int               @id @default(autoincrement())
+  name            String
+  description     String
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  ProductVariants ProductVariants[]
+  categories      Categories[]      @relation("ProductCategories")
 
   @@map("product")
 }
@@ -98,49 +98,24 @@ model ProductImages {
   @@map("product_images")
 }
 
-model ProductCategories {
-  productId  Int @map("product_id")
-  categoryId Int @map("category_id")
-
-  product  Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  category Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@id([productId, categoryId])
-  @@map("product_categories")
-}
-
 model Categories {
-  id                Int                 @id @default(autoincrement())
-  categoryName      String              @map("category_name")
-  categoryImage     String              @map("category_image")
-  createdAt         DateTime            @default(now()) @map("created_at")
-  updatedAt         DateTime            @updatedAt @map("updated_at")
-  CategoriesGroup   CategoriesGroup[]
-  Group             Group?              @relation(fields: [groupId], references: [id])
-  groupId           Int?
-  ProductCategories ProductCategories[]
+  id            Int       @id @default(autoincrement())
+  categoryName  String    @map("category_name")
+  categoryImage String    @map("category_image")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  groups        Group[]   @relation("CategoryGroups")
+  products      Product[] @relation("ProductCategories")
 
   @@map("categories")
 }
 
 model Group {
-  id              Int               @id @default(autoincrement())
-  groupName       String            @map("group_name")
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  Categories      Categories[]
-  CategoriesGroup CategoriesGroup[]
+  id         Int          @id @default(autoincrement())
+  groupName  String       @map("group_name")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+  categories Categories[] @relation("CategoryGroups")
 
   @@map("group")
-}
-
-model CategoriesGroup {
-  categoryId Int
-  groupId    Int
-
-  category Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@id([categoryId, groupId])
-  @@map("categories_group")
 }

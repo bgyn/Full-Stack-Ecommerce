@@ -1,4 +1,9 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -19,9 +24,11 @@ export const uploadFile = async (
   mimeType: string
 ) => {
   try {
+    const fileKey = `${path}/${fileName}`;
+
     const params = {
       Bucket: bucket,
-      Key: `${path}/${fileName}`,
+      Key: fileKey,
       Body: fileBuffer,
       ContentType: mimeType,
     };
@@ -30,8 +37,27 @@ export const uploadFile = async (
     await s3.send(command);
 
     console.log(`File uploaded successfully: ${fileName}`);
+
+    return await getFileSignedUrl(bucket, fileKey);
   } catch (err) {
     console.error("Error uploading file:", err);
     throw new Error("Failed to upload file");
+  }
+};
+
+const getFileSignedUrl = async (bucket: string, fileKey: string) => {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: fileKey,
+    });
+
+    // Generate a signed URL (valid for 1 hour)
+    const signedUrl = await getSignedUrl(s3, command);
+
+    return signedUrl;
+  } catch (err) {
+    console.error("Error generating signed URL:", err);
+    throw new Error("Failed to generate signed URL");
   }
 };

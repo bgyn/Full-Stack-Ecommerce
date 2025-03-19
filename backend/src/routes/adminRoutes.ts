@@ -17,8 +17,8 @@ router.get("/products/add", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
   return res.render("addProducts");
 });
 
-router.get("/categories", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
-  return res.render("categories");
+router.get("/category", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
+  return res.render("category");
 });
 
 router.get("/category/add", verifyToken, restrictTo(["ADMIN"]), (req, res) => {

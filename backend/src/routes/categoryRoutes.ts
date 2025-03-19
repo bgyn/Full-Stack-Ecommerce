@@ -1,9 +1,14 @@
 import { Router } from "express";
-import { addCategories } from "../controllers/categoryController";
+import {
+  addCategories,
+  getCategories,
+} from "../controllers/categoryController";
 import { restrictTo } from "../middelware/authMiddleware";
 import upload from "../utils/multer";
 
 const router = Router();
+
+router.get("/", getCategories);
 
 router.post(
   "/add",

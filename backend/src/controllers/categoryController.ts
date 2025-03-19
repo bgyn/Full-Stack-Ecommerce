@@ -4,6 +4,16 @@ import { uploadFile } from "../utils/r2Service";
 
 const prisma = new PrismaClient();
 
+export const getCategories = async (req: Request, res: Response) => {
+  try {
+    const categories = await prisma.categories.findMany();
+
+    res.status(200).json(categories);
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 export const addCategories = async (req: Request, res: Response) => {
   try {
     const { categoryName } = req.body;
@@ -13,7 +23,7 @@ export const addCategories = async (req: Request, res: Response) => {
       return;
     }
 
-    await uploadFile(
+    const url = await uploadFile(
       req.file.buffer,
       req.file.originalname,
       "ecommerce",
@@ -24,11 +34,11 @@ export const addCategories = async (req: Request, res: Response) => {
     const category = await prisma.categories.create({
       data: {
         categoryName,
-        categoryImage: `images/${req.file.originalname}`,
+        categoryImage: url,
       },
     });
 
-    res.status(201).json(category);
+    res.redirect("/category");
   } catch (err) {
     console.error("Error adding category:", err);
 

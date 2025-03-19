@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { uploadFile } from "../utils/uploadService";
+import { uploadFile } from "../utils/r2Service";
 
 const prisma = new PrismaClient();
 

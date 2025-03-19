@@ -104,18 +104,7 @@ model Categories {
   categoryImage String    @map("category_image")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
-  groups        Group[]   @relation("CategoryGroups")
   products      Product[] @relation("ProductCategories")
 
   @@map("categories")
-}
-
-model Group {
-  id         Int          @id @default(autoincrement())
-  groupName  String       @map("group_name")
-  createdAt  DateTime     @default(now()) @map("created_at")
-  updatedAt  DateTime     @updatedAt @map("updated_at")
-  categories Categories[] @relation("CategoryGroups")
-
-  @@map("group")
 }

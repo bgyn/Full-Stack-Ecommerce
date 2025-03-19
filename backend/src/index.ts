@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { json } from "body-parser";
 
-import { verifyToken } from "./middelware/authMiddleware";
+import { restrictTo, verifyToken } from "./middelware/authMiddleware";
 
 import authRoutes from "./routes/authRoutes";
 import adminRoutes from "./routes/adminRoutes";
@@ -19,9 +19,10 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../views"));
 
-app.use("/auth", authRoutes);
-app.use("/category", verifyToken, categoryRoutes);
-app.use("/admin", verifyToken, adminRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/category", verifyToken, categoryRoutes);
+
+app.use("/", adminRoutes);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

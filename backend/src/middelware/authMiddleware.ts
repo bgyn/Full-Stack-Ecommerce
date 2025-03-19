@@ -31,7 +31,7 @@ export const restrictTo = (roles: string[] = []) => {
     // If the user is not authenticated, deny access
     if (!req.user) {
       if (req.accepts("html")) {
-        res.redirect("/auth/login");
+        res.redirect("/login");
         return;
       }
       res.status(401).json({ message: "Unauthorized" });

@@ -1,10 +1,24 @@
-<nav class="sidebar">
+<nav class="bg-dark text-white vh-100 position-fixed p-3" style="width: 250px">
   <h3 class="text-center">Admin Panel</h3>
-  <a href="/admin/users">Users</a>
-  <a href="/admin/products">Products</a>
-  <a href="/admin/addProducts">Add Products</a>
-  <a href="/admin/categories">Categories</a>
-  <a href="/admin/payments">Payments</a>
+  <a href="/admin/users" class="d-block text-white p-2 text-decoration-none"
+    >Users</a
+  >
+  <a href="/admin/products" class="d-block text-white p-2 text-decoration-none"
+    >Products</a
+  >
+  <a
+    href="/admin/products/add"
+    class="d-block text-white p-2 text-decoration-none"
+    >Add Products</a
+  >
+  <a
+    href="/admin/categories"
+    class="d-block text-white p-2 text-decoration-none"
+    >Categories</a
+  >
+  <a href="/admin/payments" class="d-block text-white p-2 text-decoration-none"
+    >Payments</a
+  >
   <form action="/auth/logout" method="POST" class="mt-3 text-center">
     <button type="submit" class="btn btn-danger w-75">Logout</button>
   </form>

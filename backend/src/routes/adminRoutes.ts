@@ -25,6 +25,10 @@ router.get("/category/add", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
   return res.render("addCategories");
 });
 
+router.get("/users", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
+  return res.render("users");
+});
+
 router.post("/logout", restrictTo(["ADMIN"]), (req, res) => {
   res.clearCookie("token");
   res.redirect("login");

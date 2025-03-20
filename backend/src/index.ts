@@ -12,6 +12,7 @@ import adminRoutes from "./routes/adminRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
+import userRoutes from "./routes/userRoutes";
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/category", verifyToken, categoryRoutes);
 app.use("/api/v1/product", verifyToken, productRoutes);
 app.use("/api/v1/review", verifyToken, reviewRoutes);
+app.use("/api/v1/user", verifyToken, userRoutes);
 
 app.use("/", adminRoutes);
 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("./partials/head.ejs") %>
+    <title>Users</title>
+    <style>
+      /* Ensure main content does not overlap */
+      .main-content {
+        margin-left: 250px; /* Push content to the right */
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include("./partials/nav") %>
+
+    <div class="main-content">
+      <div class="container mt-4">
+        <h2 class="mb-4">User List</h2>
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Active</th>
+                <th>Created At</th>
+              </tr>
+            </thead>
+            <tbody id="user-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/v1/user")
+          .then((response) => response.json())
+          .then((users) => {
+            const tableBody = document.getElementById("user-table-body");
+            tableBody.innerHTML = "";
+
+            users.forEach((user) => {
+              const row = document.createElement("tr");
+
+              row.innerHTML = `
+                <td>
+                  <img 
+                    src="${
+                      user.profile.profileImage
+                        ? user.profile.profileImage
+                        : "https://cdn-icons-png.flaticon.com/128/456/456212.png"
+                    }" 
+                    alt="User Image" 
+                    class="rounded-circle"
+                    width="30"
+                    height="30"
+                  />
+                </td>
+                <td>${user.profile.name}</td>
+                <td>${user.email}</td>
+                <td>${user.role}</td>
+                <td>
+                  <span class="badge ${
+                    user.isActive ? "bg-success" : "bg-danger"
+                  }">
+                    ${user.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+              `;
+
+              tableBody.appendChild(row);
+            });
+          })
+          .catch((error) => console.error("Error fetching users:", error));
+      });
+    </script>
+
+    <%- include("./partials/script") %>
+  </body>
+</html>

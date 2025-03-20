@@ -2,210 +2,291 @@
 <html lang="en">
   <head>
     <%- include("./partials/head.ejs") %>
-    <title>Manage Products</title>
+    <title>Add Product</title>
     <style>
-      /* Ensure main content does not overlap */
       .main-content {
-        margin-left: 250px; /* Push content to the right */
+        margin-left: 250px;
         padding: 20px;
+      }
+      .variant-section {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+      .add-variant-btn {
+        margin-bottom: 20px;
       }
     </style>
   </head>
   <body>
-    <!-- Sidebar Navigation -->
     <%- include("./partials/nav.ejs") %>
 
-    <!-- Main Content -->
     <div class="main-content">
       <div class="container-fluid mt-4">
-        <h1>Manage Products</h1>
-        <h3>Add New Product</h3>
-        <form id="addProductForm" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label for="name" class="form-label">Product Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              class="form-control"
-              required
-            />
-          </div>
-          <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              class="form-control"
-              required
-            ></textarea>
+        <h1>Add Product</h1>
+
+        <!-- Product Details Section -->
+        <form
+          action="/api/v1/product/add"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <div class="card mb-4">
+            <div class="card-header">Product Details</div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productName"
+                  name="productName"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="productDescription">Description</label>
+                <textarea
+                  class="form-control"
+                  id="productDescription"
+                  name="productDescription"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="category">Category</label>
+                <select
+                  multiple
+                  class="form-control"
+                  id="category"
+                  name="category"
+                  required
+                >
+                  <option value="">Select Category</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          <h4>Product Variants</h4>
-          <div id="variants-container"></div>
-          <button
-            type="button"
-            class="btn btn-primary mb-3"
-            onclick="addVariant()"
-          >
-            Add Variant
-          </button>
-          <button type="submit" class="btn btn-success">Add Product</button>
+          <!-- Variant Section -->
+          <div class="card mb-4">
+            <div class="card-header">Variants</div>
+            <div class="card-body" id="variantContainer">
+              <!-- Initial Variant -->
+              <div class="variant-section">
+                <div class="form-row">
+                  <div class="form-group col-md-3">
+                    <label for="price">Price</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="variants[0][price]"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="color">Color</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="variants[0][color]"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="size">Size</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="variants[0][size]"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="stock">Stock</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="variants[0][stock]"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="sku">SKU</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="variants[0][sku]"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="images">Images (Max 5)</label>
+                    <input
+                      type="file"
+                      class="form-control"
+                      name="variants[0][images]"
+                      multiple
+                      accept="image/*"
+                      max="5"
+                      required
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm remove-variant-btn"
+                >
+                  Remove Variant
+                </button>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button
+                type="button"
+                class="btn btn-primary add-variant-btn"
+                id="addVariant"
+              >
+                Add Variant
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-success">Submit</button>
         </form>
       </div>
     </div>
 
+    <%- include("./partials/script.ejs") %>
+
+    <!-- JavaScript for Dynamic Variant Addition -->
     <script>
-      function addVariant() {
-        const variantContainer = document.getElementById("variants-container");
-        const index = document.querySelectorAll(".variant-container").length;
-
-        const variantHTML = `
-          <div class="variant-container border p-3 mb-3">
-            <h5>Variant ${index + 1}</h5>
-            <button type="button" class="btn btn-danger btn-sm float-end" onclick="removeVariant(this)">Remove Variant</button>
-            <div class="mb-2">
-              <label>Price</label>
-              <input type="number" name="variants[${index}][price]" class="form-control" required />
-            </div>
-            <div class="mb-2">
-              <label>Color</label>
-              <input type="text" name="variants[${index}][color]" class="form-control" required />
-            </div>
-            <div class="mb-2">
-              <label>Size</label>
-              <input type="text" name="variants[${index}][size]" class="form-control" required />
-            </div>
-            <div class="mb-2">
-              <label>Stock</label>
-              <input type="number" name="variants[${index}][stock]" class="form-control" required />
-            </div>
-            <div class="mb-2">
-              <label>SKU</label>
-              <input type="text" name="variants[${index}][sku]" class="form-control" required />
-            </div>
-            <h6>Images</h6>
-            <div id="images-container-${index}"></div>
-            <button type="button" class="btn btn-secondary" onclick="addImage(${index})">Add Image</button>
-          </div>
-        `;
-
-        variantContainer.innerHTML += variantHTML;
-      }
-
-      function removeVariant(button) {
-        const variantContainer = button.closest(".variant-container");
-        if (variantContainer) {
-          variantContainer.remove();
-        }
-      }
-
-      function addImage(variantIndex) {
-        const imageContainer = document.getElementById(
-          `images-container-${variantIndex}`
-        );
-        const imageIndex = document.querySelectorAll(
-          `#images-container-${variantIndex} .image-field`
-        ).length;
-
-        const imageHTML = `
-          <div class="image-field mt-2">
-            <button type="button" class="btn btn-danger btn-sm float-end" onclick="removeImage(this)">Remove Image</button>
-            <label>Image File</label>
-            <input type="file" name="variants[${variantIndex}][images][${imageIndex}][image]" class="form-control" accept="image/*" required />
-            <label>Is Primary?</label>
-            <select name="variants[${variantIndex}][images][${imageIndex}][isPrimary]" class="form-control">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-        `;
-
-        imageContainer.innerHTML += imageHTML;
-      }
-
-      function removeImage(button) {
-        const imageField = button.closest(".image-field");
-        if (imageField) {
-          imageField.remove();
-        }
-      }
-
-      document
-        .getElementById("addProductForm")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-
-          const formData = new FormData(this);
-
-          formData.append("name", document.getElementById("name").value);
-          formData.append(
-            "description",
-            document.getElementById("description").value
-          );
-
-          document
-            .querySelectorAll(".variant-container")
-            .forEach((variantElem, i) => {
-              formData.append(
-                `variants[${i}][price]`,
-                variantElem.querySelector('input[name="variants[${i}][price]"]')
-                  .value
-              );
-              formData.append(
-                `variants[${i}][color]`,
-                variantElem.querySelector('input[name="variants[${i}][color]"]')
-                  .value
-              );
-              formData.append(
-                `variants[${i}][size]`,
-                variantElem.querySelector('input[name="variants[${i}][size]"]')
-                  .value
-              );
-              formData.append(
-                `variants[${i}][stock]`,
-                variantElem.querySelector('input[name="variants[${i}][stock]"]')
-                  .value
-              );
-              formData.append(
-                `variants[${i}][sku]`,
-                variantElem.querySelector('input[name="variants[${i}][sku]"]')
-                  .value
-              );
-
-              document
-                .querySelectorAll(`#images-container-${i} .image-field`)
-                .forEach((imageElem, j) => {
-                  const fileInput =
-                    imageElem.querySelector('input[type="file"]');
-                  if (fileInput.files.length > 0) {
-                    formData.append(
-                      `variants[${i}][images][${j}][image]`,
-                      fileInput.files[0]
-                    );
-                  }
-                  formData.append(
-                    `variants[${i}][images][${j}][isPrimary]`,
-                    imageElem.querySelector("select").value
-                  );
-                });
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/v1/category")
+          .then((response) => response.json())
+          .then((data) => {
+            const categorySelect = document.getElementById("category");
+            data.forEach((category) => {
+              const option = document.createElement("option");
+              option.value = category.id;
+              option.text = category.categoryName;
+              categorySelect.appendChild(option);
             });
+          })
+          .catch((error) => console.error("Error fetching categories:", error));
+      });
 
-          const response = await fetch("/products/add", {
-            method: "POST",
-            body: formData,
+      document.addEventListener("DOMContentLoaded", function () {
+        const variantContainer = document.getElementById("variantContainer");
+        const addVariantBtn = document.getElementById("addVariant");
+
+        let variantCount = 1; // Start counting from 1 since the first variant is already present
+
+        // Function to create a new variant section
+        function createVariantSection(index) {
+          const newVariant = document.createElement("div");
+          newVariant.classList.add("variant-section");
+
+          newVariant.innerHTML = `
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="price">Price</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        name="variants[${index}][price]"
+                        required
+                      />
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="color">Color</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="variants[${index}][color]"
+                        required
+                      />
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="size">Size</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="variants[${index}][size]"
+                        required
+                      />
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="stock">Stock</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        name="variants[${index}][stock]"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="sku">SKU</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="variants[${index}][sku]"
+                        required
+                      />
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="images">Images (Max 5)</label>
+                      <input
+                        type="file"
+                        class="form-control"
+                        name="variants[${index}][images]"
+                        multiple
+                        accept="image/*"
+                        max="5"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm remove-variant-btn"
+                  >
+                    Remove Variant
+                  </button>
+                `;
+
+          // Add event listener to the remove button
+          const removeBtn = newVariant.querySelector(".remove-variant-btn");
+          removeBtn.addEventListener("click", function () {
+            newVariant.remove();
           });
 
-          const data = await response.json();
-          if (response.ok) {
-            alert("Product added successfully!");
-            window.location.reload();
-          } else {
-            alert(data.message || "Failed to add product");
-          }
-        });
-    </script>
+          return newVariant;
+        }
 
-    <%- include("./partials/script.ejs") %>
+        // Add Variant Button Click Event
+        addVariantBtn.addEventListener("click", function () {
+          const newVariant = createVariantSection(variantCount);
+          variantContainer.appendChild(newVariant);
+          variantCount++;
+        });
+
+        // Remove Variant Functionality for Initial Variant
+        const removeButtons = document.querySelectorAll(".remove-variant-btn");
+        removeButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            button.closest(".variant-section").remove();
+          });
+        });
+      });
+    </script>
   </body>
 </html>

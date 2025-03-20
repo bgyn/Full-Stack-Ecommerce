@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { uploadFile } from "../utils/r2Service";
+import { getFileSignedUrl, uploadFile } from "../utils/r2Service";
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,22 @@ export const getCategories = async (req: Request, res: Response) => {
   try {
     const categories = await prisma.categories.findMany();
 
-    res.status(200).json(categories);
+    const bucket = "ecommerce";
+
+    const categoriesWithSignedUrl = await Promise.all(
+      categories.map(async (category) => {
+        {
+          const signedUrl = await getFileSignedUrl(
+            bucket,
+            category.categoryImage
+          );
+
+          return { ...category, signedUrl };
+        }
+      })
+    );
+
+    res.status(200).json(categoriesWithSignedUrl);
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -23,18 +38,21 @@ export const addCategories = async (req: Request, res: Response) => {
       return;
     }
 
-    const url = await uploadFile(
+    const bucket = "ecommerce";
+    const path = "category/images";
+
+    await uploadFile(
       req.file.buffer,
       req.file.originalname,
-      "ecommerce",
-      "category/images",
+      bucket,
+      path,
       req.file.mimetype
     );
 
-    const category = await prisma.categories.create({
+    await prisma.categories.create({
       data: {
         categoryName,
-        categoryImage: url,
+        categoryImage: `${path}/${req.file.originalname}`,
       },
     });
 

@@ -37,23 +37,20 @@ export const uploadFile = async (
     await s3.send(command);
 
     console.log(`File uploaded successfully: ${fileName}`);
-
-    return await getFileSignedUrl(bucket, fileKey);
   } catch (err) {
     console.error("Error uploading file:", err);
     throw new Error("Failed to upload file");
   }
 };
 
-const getFileSignedUrl = async (bucket: string, fileKey: string) => {
+export const getFileSignedUrl = async (bucket: string, fileKey: string) => {
   try {
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: fileKey,
     });
 
-    // Generate a signed URL (valid for 1 hour)
-    const signedUrl = await getSignedUrl(s3, command);
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
 
     return signedUrl;
   } catch (err) {

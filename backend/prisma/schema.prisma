@@ -57,18 +57,19 @@ model Profile {
 }
 
 model Product {
-  id              Int               @id @default(autoincrement())
-  name            String
-  description     String
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  ProductVariants ProductVariants[]
-  categories      Categories[]      @relation("ProductCategories")
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  productVariants ProductVariant[]
+  categories      Categories[]     @relation("ProductCategories")
 
   @@map("product")
 }
 
-model ProductVariants {
+model ProductVariant {
   id        Int      @id @default(autoincrement())
   productId Int
   price     Float
@@ -79,21 +80,20 @@ model ProductVariants {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  ProductImages ProductImages[]
+  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images  ProductImage[]
 
   @@map("product_variants")
 }
 
-model ProductImages {
+model ProductImage {
   id               Int      @id @default(autoincrement())
   productVariantId Int
   image            String
-  isPrimary        Boolean  @default(false) @map("is_primary")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  productVariant ProductVariants? @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
 
   @@map("product_images")
 }

@@ -31,3 +31,5 @@ app.use("/", adminRoutes);
 app.listen(3000, process.env.HOST!, () => {
   console.log("Server is running on port 3000");
 });
+
+

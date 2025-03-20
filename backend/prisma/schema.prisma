@@ -12,17 +12,36 @@ enum Role {
   USER
 }
 
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  role       Role     @default(USER)
-  isActive   Boolean  @default(true) @map("is_active")
-  isVerified Boolean  @default(false) @map("is_verified")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-  fcms       FCM[]
-  profile    Profile?
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  password        String
+  role            Role              @default(USER)
+  isActive        Boolean           @default(true) @map("is_active")
+  isVerified      Boolean           @default(false) @map("is_verified")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  fcms            FCM[]
+  profile         Profile?
+  Review          Review[]
+  Cart            Cart[]
+  ShippingAddress ShippingAddress[]
+  Order           Order[]
+  Payment         Payment[]
 
   @@map("user")
 }
@@ -56,6 +75,20 @@ model Profile {
   @@map("profile")
 }
 
+model ShippingAddress {
+  int                    Int     @id @default(autoincrement())
+  userId                 Int
+  recipientName          String  @map("recipient_name")
+  recipientPhone         Int     @map("recipient_phone")
+  address                String
+  defaultShippingAddress Boolean @default(false) @map("default_shipping_address")
+  defaultBillingAddress  Boolean @default(false) @map("default_billing_address")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("shipping_address")
+}
+
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
@@ -65,6 +98,7 @@ model Product {
 
   productVariants ProductVariant[]
   categories      Categories[]     @relation("ProductCategories")
+  Review          Review[]
 
   @@map("product")
 }
@@ -80,8 +114,10 @@ model ProductVariant {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
-  images  ProductImage[]
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images    ProductImage[]
+  CartItem  CartItem[]
+  OrderItem OrderItem[]
 
   @@map("product_variants")
 }
@@ -98,6 +134,33 @@ model ProductImage {
   @@map("product_images")
 }
 
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  rating    Int
+  review    String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ReviewImages ReviewImages[]
+
+  @@map("review")
+}
+
+model ReviewImages {
+  id        Int      @id @default(autoincrement())
+  reviewId  Int
+  image     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("review_images")
+}
+
 model Categories {
   id            Int       @id @default(autoincrement())
   categoryName  String    @map("category_name")
@@ -108,3 +171,78 @@ model Categories {
 
   @@map("categories")
 }
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  CartItem CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id               Int      @id @default(autoincrement())
+  cartId           Int
+  productVariantId Int
+  quantity         Int
+  price            Float
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+
+  @@map("cart_item")
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  orderStatus OrderStatus @default(PENDING) @map("order_status")
+  totalAmount Float       @map("total_amount")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  OrderItem OrderItem[]
+  Payment   Payment[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  id               Int      @id @default(autoincrement())
+  orderId          Int
+  productVariantId Int
+  quantity         Int
+  price            Float
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+
+  @@map("order_item")
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  orderId       Int
+  userId        Int
+  paymentMethod String        @map("payment_method")
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  paymentAmount Float         @map("payment_amount")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("payment")
+}
+
+

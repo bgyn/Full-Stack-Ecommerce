@@ -22,6 +22,9 @@ type Variants = {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
+    const sizes: string[] = [];
+    const colors: string[] = [];
+    const rating : number = 0;
     const products = await prisma.product.findMany({
       select: {
         id: true,
@@ -59,9 +62,6 @@ export const getProducts = async (req: Request, res: Response) => {
         }
       }
     }
-
-    const sizes: string[] = [];
-    const colors: string[] = [];
 
     products.forEach((product) => {
       product.productVariants.forEach((variant) => {

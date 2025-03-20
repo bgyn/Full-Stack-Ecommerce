@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import productRoutes from "./routes/productRoutes";
+import reviewRoutes from "./routes/reviewRoutes";
 
 dotenv.config();
 const app = express();
@@ -25,11 +26,10 @@ app.set("views", path.join(__dirname, "../views"));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/category", verifyToken, categoryRoutes);
 app.use("/api/v1/product", verifyToken, productRoutes);
+app.use("/api/v1/review", verifyToken, reviewRoutes);
 
 app.use("/", adminRoutes);
 
 app.listen(3000, process.env.HOST!, () => {
   console.log("Server is running on port 3000");
 });
-
-

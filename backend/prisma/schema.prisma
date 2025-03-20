@@ -73,10 +73,10 @@ model ProductVariant {
   id        Int      @id @default(autoincrement())
   productId Int
   price     Float
+  sku       String
   color     String
   size      String
   stock     Int
-  sku       String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

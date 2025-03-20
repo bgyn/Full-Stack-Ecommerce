@@ -3,6 +3,7 @@
   <head>
     <%- include("./partials/head.ejs") %>
     <title>Add Product</title>
+    <!-- Bootstrap CSS -->
     <style>
       .main-content {
         margin-left: 250px;
@@ -23,8 +24,8 @@
     <%- include("./partials/nav.ejs") %>
 
     <div class="main-content">
-      <div class="container-fluid mt-4">
-        <h1>Add Product</h1>
+      <div class="container mt-4">
+        <h1 class="mb-4">Add Product</h1>
 
         <!-- Product Details Section -->
         <form
@@ -35,29 +36,31 @@
           <div class="card mb-4">
             <div class="card-header">Product Details</div>
             <div class="card-body">
-              <div class="form-group">
-                <label for="productName">Product Name</label>
+              <div class="mb-3">
+                <label for="productName" class="form-label">Product Name</label>
                 <input
                   type="text"
                   class="form-control"
                   id="productName"
-                  name="productName"
+                  name="name"
                   required
                 />
               </div>
-              <div class="form-group">
-                <label for="productDescription">Description</label>
+              <div class="mb-3">
+                <label for="productDescription" class="form-label"
+                  >Description</label
+                >
                 <textarea
                   class="form-control"
                   id="productDescription"
-                  name="productDescription"
+                  name="description"
                   rows="3"
                   required
                 ></textarea>
               </div>
 
-              <div class="form-group">
-                <label for="category">Category</label>
+              <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
                 <select
                   multiple
                   class="form-control"
@@ -77,9 +80,9 @@
             <div class="card-body" id="variantContainer">
               <!-- Initial Variant -->
               <div class="variant-section">
-                <div class="form-row">
-                  <div class="form-group col-md-3">
-                    <label for="price">Price</label>
+                <div class="row mb-3">
+                  <div class="col-md-3">
+                    <label for="price" class="form-label">Price</label>
                     <input
                       type="number"
                       class="form-control"
@@ -87,8 +90,8 @@
                       required
                     />
                   </div>
-                  <div class="form-group col-md-3">
-                    <label for="color">Color</label>
+                  <div class="col-md-3">
+                    <label for="color" class="form-label">Color</label>
                     <input
                       type="text"
                       class="form-control"
@@ -96,8 +99,8 @@
                       required
                     />
                   </div>
-                  <div class="form-group col-md-3">
-                    <label for="size">Size</label>
+                  <div class="col-md-3">
+                    <label for="size" class="form-label">Size</label>
                     <input
                       type="text"
                       class="form-control"
@@ -105,8 +108,8 @@
                       required
                     />
                   </div>
-                  <div class="form-group col-md-3">
-                    <label for="stock">Stock</label>
+                  <div class="col-md-3">
+                    <label for="stock" class="form-label">Stock</label>
                     <input
                       type="number"
                       class="form-control"
@@ -115,9 +118,9 @@
                     />
                   </div>
                 </div>
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="sku">SKU</label>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="sku" class="form-label">SKU</label>
                     <input
                       type="text"
                       class="form-control"
@@ -125,8 +128,10 @@
                       required
                     />
                   </div>
-                  <div class="form-group col-md-6">
-                    <label for="images">Images (Max 5)</label>
+                  <div class="col-md-6">
+                    <label for="images" class="form-label"
+                      >Images (Max 5)</label
+                    >
                     <input
                       type="file"
                       class="form-control"
@@ -194,9 +199,9 @@
           newVariant.classList.add("variant-section");
 
           newVariant.innerHTML = `
-                  <div class="form-row">
-                    <div class="form-group col-md-3">
-                      <label for="price">Price</label>
+                  <div class="row mb-3">
+                    <div class="col-md-3">
+                      <label for="price" class="form-label">Price</label>
                       <input
                         type="number"
                         class="form-control"
@@ -204,8 +209,8 @@
                         required
                       />
                     </div>
-                    <div class="form-group col-md-3">
-                      <label for="color">Color</label>
+                    <div class="col-md-3">
+                      <label for="color" class="form-label">Color</label>
                       <input
                         type="text"
                         class="form-control"
@@ -213,8 +218,8 @@
                         required
                       />
                     </div>
-                    <div class="form-group col-md-3">
-                      <label for="size">Size</label>
+                    <div class="col-md-3">
+                      <label for="size" class="form-label">Size</label>
                       <input
                         type="text"
                         class="form-control"
@@ -222,8 +227,8 @@
                         required
                       />
                     </div>
-                    <div class="form-group col-md-3">
-                      <label for="stock">Stock</label>
+                    <div class="col-md-3">
+                      <label for="stock" class="form-label">Stock</label>
                       <input
                         type="number"
                         class="form-control"
@@ -232,9 +237,9 @@
                       />
                     </div>
                   </div>
-                  <div class="form-row">
-                    <div class="form-group col-md-6">
-                      <label for="sku">SKU</label>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="sku" class="form-label">SKU</label>
                       <input
                         type="text"
                         class="form-control"
@@ -242,8 +247,8 @@
                         required
                       />
                     </div>
-                    <div class="form-group col-md-6">
-                      <label for="images">Images (Max 5)</label>
+                    <div class="col-md-6">
+                      <label for="images" class="form-label">Images (Max 5)</label>
                       <input
                         type="file"
                         class="form-control"

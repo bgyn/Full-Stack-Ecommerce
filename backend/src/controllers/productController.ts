@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { buffer } from "stream/consumers";
-import upload from "../utils/multer";
-import { uploadFile } from "../utils/r2Service";
+import { getFileSignedUrl, uploadFile } from "../utils/r2Service";
 
 const prisma = new PrismaClient();
 
@@ -14,25 +12,76 @@ type Product = {
 };
 
 type Variants = {
-  name: string;
   description: string;
-  price: number;
+  price: string;
   size: string;
-  stock: number;
+  stock: string;
   color: string;
   sku: string;
 };
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await prisma.product.findMany();
-    res.status(200).json(products);
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        productVariants: {
+          select: {
+            id: true,
+            price: true,
+            sku: true,
+            color: true,
+            size: true,
+            stock: true,
+            images: {
+              select: {
+                productVariantId: true,
+                image: true,
+              },
+            },
+          },
+        },
+        categories: {
+          select: {
+            id: true,
+            categoryName: true,
+          },
+        },
+      },
+    });
+
+    for (const product of products) {
+      for (const variant of product.productVariants) {
+        for (const image of variant.images) {
+          image.image = await getFileSignedUrl("ecommerce", image.image);
+        }
+      }
+    }
+
+    const sizes: string[] = [];
+    const colors: string[] = [];
+
+    products.forEach((product) => {
+      product.productVariants.forEach((variant) => {
+        if (!sizes.includes(variant.size)) {
+          sizes.push(variant.size);
+        }
+
+        if (!colors.includes(variant.color)) {
+          colors.push(variant.color);
+        }
+      });
+    });
+
+    res.status(200).json({ ...products, sizes, colors });
   } catch (err) {
     res.status(500).json({ message: err });
   }
 };
 
-export const addProudct = async (req: Request, res: Response) => {
+export const addProduct = async (req: Request, res: Response) => {
   try {
     const variantImagesMap: Record<string, any> = {};
     const product = req.body as Product;
@@ -40,6 +89,10 @@ export const addProudct = async (req: Request, res: Response) => {
 
     const bucket = "ecommerce";
     const path = "products/images";
+
+    const categories = Array.isArray(product.category)
+      ? product.category
+      : [product.category];
 
     files.forEach((file) => {
       const fieldMatch = file.fieldname.match(/variants\[(\d+)\]\[images\]/);
@@ -60,7 +113,7 @@ export const addProudct = async (req: Request, res: Response) => {
 
     const productVariantsData = await Promise.all(
       product.variants.map(async (variant: Variants, index: number) => {
-        const uploadedImages = await Promise.all(
+        await Promise.all(
           (variantImagesMap[index] || []).map(async (image: any) => {
             await uploadFile(
               image.buffer,
@@ -69,19 +122,21 @@ export const addProudct = async (req: Request, res: Response) => {
               path,
               image.mimetype
             );
-            return {
-              image: `${path}/${image.fileName}`,
-            };
+            return { image: `${path}/${image.originalname}` };
           })
         );
 
         return {
-          price: variant.price,
-          color: variant.color,
-          size: variant.size.toString(),
-          stock: variant.stock,
+          price: parseFloat(variant.price),
           sku: variant.sku,
-          images: { create: uploadedImages },
+          stock: parseInt(variant.stock, 10),
+          size: variant.size,
+          color: variant.color,
+          images: {
+            create: (variantImagesMap[index] || []).map((image: any) => ({
+              image: `${path}/${image.fileName}`,
+            })),
+          },
         };
       })
     );
@@ -90,9 +145,11 @@ export const addProudct = async (req: Request, res: Response) => {
       data: {
         name: product.name,
         description: product.description,
-        productVariants: { create: productVariantsData },
+        productVariants: {
+          create: productVariantsData,
+        },
         categories: {
-          connect: product.category.map((category) => ({
+          connect: categories.map((category: string) => ({
             id: parseInt(category, 10),
           })),
         },
@@ -101,6 +158,7 @@ export const addProudct = async (req: Request, res: Response) => {
 
     res.status(201).json({ newProduct });
   } catch (err) {
-    res.status(500).json({ message: err });
+    console.error("Error creating product:", err);
+    res.status(500).json({ message: err || "Internal Server Error" });
   }
 };

@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import dotenv from "dotenv";
@@ -56,5 +57,20 @@ export const getFileSignedUrl = async (bucket: string, fileKey: string) => {
   } catch (err) {
     console.error("Error generating signed URL:", err);
     throw new Error("Failed to generate signed URL");
+  }
+};
+
+export const deleteFile = async (bucket: string, fileKey: string) => {
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: fileKey,
+    });
+
+    await s3.send(command);
+    console.log(`File deleted successfully: ${fileKey}`);
+  } catch (err) {
+    console.error("Error deleting file:", err);
+    throw new Error("Failed to delete file");
   }
 };

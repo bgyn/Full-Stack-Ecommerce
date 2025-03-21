@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { getFileSignedUrl, uploadFile } from "../utils/r2Service";
+import { deleteFile, getFileSignedUrl, uploadFile } from "../utils/r2Service";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
@@ -171,11 +171,25 @@ export const removeProduct = async (req: Request, res: Response) => {
     return;
   }
   try {
-    await prisma.product.delete({
+    const product = await prisma.product.delete({
       where: {
         id: productId,
       },
+      select: {
+        images: {
+          select: {
+            url: true,
+          },
+        },
+      },
     });
+
+    await Promise.all(
+      product.images.map(async (image) => {
+        await deleteFile("ecommerce", image.url);
+      })
+    );
+
     res.status(200).json({ message: "Product removed" });
   } catch (err) {
     console.error("Error removing product:", err);

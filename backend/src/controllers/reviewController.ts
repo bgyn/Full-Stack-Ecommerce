@@ -8,7 +8,7 @@ export const getReviews = async (req: Request, res: Response) => {
     const productId = req.query.productId;
 
     if (!productId || isNaN(parseInt(productId.toString()))) {
-      res.status(400).json({ message: "Product ID is required or invalid ID" });
+      res.status(400).json({ message: "Invalid product Id" });
       return;
     }
 
@@ -28,16 +28,14 @@ export const getReviews = async (req: Request, res: Response) => {
       },
     });
 
+    let totalRatingSum = 0;
+
     reviews.forEach((review) => {
       if (review.rating >= 1 && review.rating <= 5) {
         reviewMapData[review.rating.toString()] += 1;
       }
+      totalRatingSum += review.rating;
     });
-
-    let totalRatingSum = 0;
-    for (let i = 0; i < reviews.length; i++) {
-      totalRatingSum += reviews[i].rating;
-    }
 
     const averageRating = (totalRatingSum / reviews.length).toFixed(1);
 

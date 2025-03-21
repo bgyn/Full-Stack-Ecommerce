@@ -90,46 +90,33 @@ model ShippingAddress {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   name        String
   description String
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  price       Float
+  stock       Int
+  sizes       String[]
 
-  productVariants ProductVariant[]
-  categories      Categories[]     @relation("ProductCategories")
-  Review          Review[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categories   Categories[]   @relation("ProductCategories")
+  Review       Review[]
+  images ProductImage[]
+  CartItem     CartItem[]
+  OrderItem    OrderItem[]
 
   @@map("product")
 }
 
-model ProductVariant {
+model ProductImage {
   id        Int      @id @default(autoincrement())
-  productId Int
-  price     Float
-  sku       String
-  color     String
-  size      String
-  stock     Int
+  productID Int
+  url     String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
-  images    ProductImage[]
-  CartItem  CartItem[]
-  OrderItem OrderItem[]
-
-  @@map("product_variants")
-}
-
-model ProductImage {
-  id               Int      @id @default(autoincrement())
-  productVariantId Int
-  image            String
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productID], references: [id], onDelete: Cascade)
 
   @@map("product_images")
 }
@@ -185,16 +172,17 @@ model Cart {
 }
 
 model CartItem {
-  id               Int      @id @default(autoincrement())
-  cartId           Int
-  productVariantId Int
-  quantity         Int
-  price            Float
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("cart_item")
 }
@@ -215,16 +203,16 @@ model Order {
 }
 
 model OrderItem {
-  id               Int      @id @default(autoincrement())
-  orderId          Int
-  productVariantId Int
-  quantity         Int
-  price            Float
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("order_item")
 }
@@ -244,5 +232,3 @@ model Payment {
 
   @@map("payment")
 }
-
-

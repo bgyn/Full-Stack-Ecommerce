@@ -3,20 +3,43 @@
   <head>
     <%- include("./partials/head.ejs") %>
     <title>Add Product</title>
-    <!-- Bootstrap CSS -->
     <style>
       .main-content {
         margin-left: 250px;
         padding: 20px;
       }
-      .variant-section {
-        border: 1px solid #ddd;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
+      .image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
       }
-      .add-variant-btn {
-        margin-bottom: 20px;
+      .image-container {
+        position: relative;
+        display: inline-block;
+      }
+      .image-container img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+      }
+      .remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
       }
     </style>
   </head>
@@ -27,7 +50,6 @@
       <div class="container mt-4">
         <h1 class="mb-4">Add Product</h1>
 
-        <!-- Product Details Section -->
         <form
           action="/api/v1/product/add"
           method="POST"
@@ -58,7 +80,6 @@
                   required
                 ></textarea>
               </div>
-
               <div class="mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select
@@ -67,102 +88,60 @@
                   id="category"
                   name="category"
                   required
+                ></select>
+              </div>
+              <div class="mb-3">
+                <label for="price" class="form-label">Price</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="price"
+                  name="price"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="stock" class="form-label">Stock</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="stock"
+                  name="stock"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="sizes" class="form-label">Sizes</label>
+                <select
+                  multiple
+                  class="form-control"
+                  id="sizes"
+                  name="sizes"
+                  required
                 >
-                  <option value="">Select Category</option>
+                  <option value="XS">XS</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="2XL">2XL</option>
                 </select>
               </div>
-            </div>
-          </div>
-
-          <!-- Variant Section -->
-          <div class="card mb-4">
-            <div class="card-header">Variants</div>
-            <div class="card-body" id="variantContainer">
-              <!-- Initial Variant -->
-              <div class="variant-section">
-                <div class="row mb-3">
-                  <div class="col-md-3">
-                    <label for="price" class="form-label">Price</label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="variants[0][price]"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label for="color" class="form-label">Color</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="variants[0][color]"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label for="size" class="form-label">Size</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="variants[0][size]"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label for="stock" class="form-label">Stock</label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="variants[0][stock]"
-                      required
-                    />
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <div class="col-md-6">
-                    <label for="sku" class="form-label">SKU</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="variants[0][sku]"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-6">
-                    <label for="images" class="form-label"
-                      >Images (Max 5)</label
-                    >
-                    <input
-                      type="file"
-                      class="form-control"
-                      name="variants[0][images]"
-                      multiple
-                      accept="image/*"
-                      max="5"
-                      required
-                    />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-danger btn-sm remove-variant-btn"
-                >
-                  Remove Variant
-                </button>
+              <div class="mb-3">
+                <label for="images" class="form-label">Images (Max 5)</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="images"
+                  name="images"
+                  multiple
+                  accept="image/*"
+                  required
+                />
+                <div class="image-preview mt-3" id="imagePreview"></div>
               </div>
             </div>
-            <div class="card-footer">
-              <button
-                type="button"
-                class="btn btn-primary add-variant-btn"
-                id="addVariant"
-              >
-                Add Variant
-              </button>
-            </div>
           </div>
-
-          <!-- Submit Button -->
           <button type="submit" class="btn btn-success">Submit</button>
         </form>
       </div>
@@ -170,9 +149,9 @@
 
     <%- include("./partials/script.ejs") %>
 
-    <!-- JavaScript for Dynamic Variant Addition -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Fetch categories and populate the select field
         fetch("/api/v1/category")
           .then((response) => response.json())
           .then((data) => {
@@ -185,112 +164,53 @@
             });
           })
           .catch((error) => console.error("Error fetching categories:", error));
-      });
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const variantContainer = document.getElementById("variantContainer");
-        const addVariantBtn = document.getElementById("addVariant");
+        // Handle image preview and remove functionality
+        const imageInput = document.getElementById("images");
+        const imagePreview = document.getElementById("imagePreview");
 
-        let variantCount = 1; // Start counting from 1 since the first variant is already present
+        imageInput.addEventListener("change", function () {
+          imagePreview.innerHTML = ""; // Clear previous previews
+          const files = Array.from(imageInput.files);
 
-        // Function to create a new variant section
-        function createVariantSection(index) {
-          const newVariant = document.createElement("div");
-          newVariant.classList.add("variant-section");
+          if (files.length > 5) {
+            alert("You can upload a maximum of 5 images.");
+            imageInput.value = ""; // Reset file input
+            return;
+          }
 
-          newVariant.innerHTML = `
-                  <div class="row mb-3">
-                    <div class="col-md-3">
-                      <label for="price" class="form-label">Price</label>
-                      <input
-                        type="number"
-                        class="form-control"
-                        name="variants[${index}][price]"
-                        required
-                      />
-                    </div>
-                    <div class="col-md-3">
-                      <label for="color" class="form-label">Color</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="variants[${index}][color]"
-                        required
-                      />
-                    </div>
-                    <div class="col-md-3">
-                      <label for="size" class="form-label">Size</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="variants[${index}][size]"
-                        required
-                      />
-                    </div>
-                    <div class="col-md-3">
-                      <label for="stock" class="form-label">Stock</label>
-                      <input
-                        type="number"
-                        class="form-control"
-                        name="variants[${index}][stock]"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label for="sku" class="form-label">SKU</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="variants[${index}][sku]"
-                        required
-                      />
-                    </div>
-                    <div class="col-md-6">
-                      <label for="images" class="form-label">Images (Max 5)</label>
-                      <input
-                        type="file"
-                        class="form-control"
-                        name="variants[${index}][images]"
-                        multiple
-                        accept="image/*"
-                        max="5"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm remove-variant-btn"
-                  >
-                    Remove Variant
-                  </button>
-                `;
+          files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const imageContainer = document.createElement("div");
+              imageContainer.classList.add("image-container");
 
-          // Add event listener to the remove button
-          const removeBtn = newVariant.querySelector(".remove-variant-btn");
-          removeBtn.addEventListener("click", function () {
-            newVariant.remove();
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.alt = `Image ${index + 1}`;
+
+              const removeBtn = document.createElement("button");
+              removeBtn.classList.add("remove-btn");
+              removeBtn.innerHTML = "&times;";
+              removeBtn.onclick = function () {
+                files.splice(index, 1);
+                imagePreview.removeChild(imageContainer);
+                updateFileInput(files);
+              };
+
+              imageContainer.appendChild(img);
+              imageContainer.appendChild(removeBtn);
+              imagePreview.appendChild(imageContainer);
+            };
+            reader.readAsDataURL(file);
           });
+        });
 
-          return newVariant;
+        function updateFileInput(files) {
+          const dataTransfer = new DataTransfer();
+          files.forEach((file) => dataTransfer.items.add(file));
+          imageInput.files = dataTransfer.files;
         }
-
-        // Add Variant Button Click Event
-        addVariantBtn.addEventListener("click", function () {
-          const newVariant = createVariantSection(variantCount);
-          variantContainer.appendChild(newVariant);
-          variantCount++;
-        });
-
-        // Remove Variant Functionality for Initial Variant
-        const removeButtons = document.querySelectorAll(".remove-variant-btn");
-        removeButtons.forEach((button) => {
-          button.addEventListener("click", function () {
-            button.closest(".variant-section").remove();
-          });
-        });
       });
     </script>
   </body>

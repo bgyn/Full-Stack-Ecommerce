@@ -51,36 +51,38 @@ const productSelect = {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const sizes: string[] = [];
-    const colors: string[] = [];
+    const sizes = new Set<string>();
+    const colors = new Set<string>();
+
     const products = await prisma.product.findMany({
       select: productSelect,
     });
 
-    for (const product of products) {
-      for (const variant of product.productVariants) {
-        for (const image of variant.images) {
-          image.image = await getFileSignedUrl("ecommerce", image.image);
-        }
-      }
-    }
+    await Promise.all(
+      products.map(async (product) => {
+        await Promise.all(
+          product.productVariants.map(async (variant) => {
+            await Promise.all(
+              variant.images.map(async (image) => {
+                image.image = await getFileSignedUrl("ecommerce", image.image);
+              })
+            );
 
-    products.forEach((product) => {
-      product.productVariants.forEach((variant) => {
-        if (!sizes.includes(variant.size)) {
-          sizes.push(variant.size);
-        }
+            sizes.add(variant.size);
+            colors.add(variant.color);
+          })
+        );
+      })
+    );
 
-        if (!colors.includes(variant.color)) {
-          colors.push(variant.color);
-        }
-      });
+    res.status(200).json({
+      products,
+      sizes: Array.from(sizes),
+      colors: Array.from(colors),
     });
-
-    res.status(200).json({ products, sizes, colors });
   } catch (err) {
     console.error("Error getting products:", err);
-    res.status(500).json({ message: err });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -173,8 +175,8 @@ export const getProductById = async (req: Request, res: Response) => {
     return;
   }
   try {
-    const sizes: string[] = [];
-    const colors: string[] = [];
+    const sizes = new Set<string>();
+    const colors = new Set<string>();
     const product = await prisma.product.findUnique({
       where: {
         id: productId,
@@ -186,23 +188,22 @@ export const getProductById = async (req: Request, res: Response) => {
       return;
     }
 
-    for (const variant of product.productVariants) {
-      for (const image of variant.images) {
-        image.image = await getFileSignedUrl("ecommerce", image.image);
-      }
-    }
+    await Promise.all(
+      product.productVariants.map(async (variant) => {
+        await Promise.all(
+          variant.images.map(async (image) => {
+            image.image = await getFileSignedUrl("ecommerce", image.image);
+          })
+        );
 
-    product.productVariants.forEach((variant) => {
-      if (!sizes.includes(variant.size)) {
-        sizes.push(variant.size);
-      }
+        sizes.add(variant.size);
+        colors.add(variant.color);
+      })
+    );
 
-      if (!colors.includes(variant.color)) {
-        colors.push(variant.color);
-      }
-    });
-
-    res.status(200).json({ product, sizes, colors });
+    res
+      .status(200)
+      .json({ product, sizes: Array.from(sizes), colors: Array.from(colors) });
   } catch (err) {
     console.error("Error removing product:", err);
     res.status(500).json({ message: "Internal Server Error" });

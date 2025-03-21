@@ -54,9 +54,21 @@ export const getProducts = async (req: Request, res: Response) => {
     const sizes = new Set<string>();
     const colors = new Set<string>();
 
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+    const skip = (page - 1) * limit;
+
     const products = await prisma.product.findMany({
+      skip,
+      take: limit,
       select: productSelect,
+      orderBy: {
+        createdAt: "desc",
+      },
     });
+
+    const totalProducts = await prisma.product.count();
+    const totalPages = Math.ceil(totalProducts / limit);
 
     await Promise.all(
       products.map(async (product) => {
@@ -76,9 +88,19 @@ export const getProducts = async (req: Request, res: Response) => {
     );
 
     res.status(200).json({
-      products,
-      sizes: Array.from(sizes),
-      colors: Array.from(colors),
+      data: {
+        products,
+        sizes: Array.from(sizes),
+        colors: Array.from(colors),
+      },
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalProducts,
+        pageSize: limit,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     });
   } catch (err) {
     console.error("Error getting products:", err);

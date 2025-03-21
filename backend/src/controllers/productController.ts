@@ -21,38 +21,40 @@ type Variants = {
   sku: string;
 };
 
+const productSelect = {
+  id: true,
+  name: true,
+  description: true,
+  productVariants: {
+    select: {
+      id: true,
+      price: true,
+      sku: true,
+      color: true,
+      size: true,
+      stock: true,
+      images: {
+        select: {
+          productVariantId: true,
+          image: true,
+        },
+      },
+    },
+  },
+  categories: {
+    select: {
+      id: true,
+      categoryName: true,
+    },
+  },
+};
+
 export const getProducts = async (req: Request, res: Response) => {
   try {
     const sizes: string[] = [];
     const colors: string[] = [];
     const products = await prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        productVariants: {
-          select: {
-            id: true,
-            price: true,
-            sku: true,
-            color: true,
-            size: true,
-            stock: true,
-            images: {
-              select: {
-                productVariantId: true,
-                image: true,
-              },
-            },
-          },
-        },
-        categories: {
-          select: {
-            id: true,
-            categoryName: true,
-          },
-        },
-      },
+      select: productSelect,
     });
 
     for (const product of products) {
@@ -160,6 +162,49 @@ export const addProduct = async (req: Request, res: Response) => {
     res.status(201).json({ newProduct });
   } catch (err) {
     console.error("Error creating product:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getProductById = async (req: Request, res: Response) => {
+  const productId = parseInt(req.params.id as string, 10);
+  if (isNaN(productId)) {
+    res.status(400).json({ message: "Invalid product Id" });
+    return;
+  }
+  try {
+    const sizes: string[] = [];
+    const colors: string[] = [];
+    const product = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+      select: productSelect,
+    });
+    if (!product) {
+      res.status(404).json({ message: "Product not found" });
+      return;
+    }
+
+    for (const variant of product.productVariants) {
+      for (const image of variant.images) {
+        image.image = await getFileSignedUrl("ecommerce", image.image);
+      }
+    }
+
+    product.productVariants.forEach((variant) => {
+      if (!sizes.includes(variant.size)) {
+        sizes.push(variant.size);
+      }
+
+      if (!colors.includes(variant.color)) {
+        colors.push(variant.color);
+      }
+    });
+
+    res.status(200).json({ product, sizes, colors });
+  } catch (err) {
+    console.error("Error removing product:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

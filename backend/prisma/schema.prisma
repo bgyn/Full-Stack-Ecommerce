@@ -150,7 +150,7 @@ model ReviewImages {
 
 model Categories {
   id            Int       @id @default(autoincrement())
-  categoryName  String    @map("category_name")
+  categoryName  String    @map("category_name") @unique
   categoryImage String    @map("category_image")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")

@@ -88,11 +88,9 @@ export const getProducts = async (req: Request, res: Response) => {
     );
 
     res.status(200).json({
-      data: {
-        products,
-        sizes: Array.from(sizes),
-        colors: Array.from(colors),
-      },
+      products,
+      sizes: Array.from(sizes),
+      colors: Array.from(colors),
       pagination: {
         currentPage: page,
         totalPages,

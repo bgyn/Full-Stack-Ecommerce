@@ -24,7 +24,6 @@ export const getProducts = async (req: Request, res: Response) => {
   try {
     const sizes: string[] = [];
     const colors: string[] = [];
-    const rating : number = 0;
     const products = await prisma.product.findMany({
       select: {
         id: true,
@@ -77,6 +76,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
     res.status(200).json({ ...products, sizes, colors });
   } catch (err) {
+    console.error("Error getting products:", err);
     res.status(500).json({ message: err });
   }
 };
@@ -159,6 +159,25 @@ export const addProduct = async (req: Request, res: Response) => {
     res.status(201).json({ newProduct });
   } catch (err) {
     console.error("Error creating product:", err);
-    res.status(500).json({ message: err || "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const removeProduct = async (req: Request, res: Response) => {
+  const productId = parseInt(req.query.productId as string, 10);
+  if (isNaN(productId)) {
+    res.status(400).json({ message: "Invalid product Id" });
+    return;
+  }
+  try {
+    await prisma.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+    res.status(200).json({ message: "Product removed" });
+  } catch (err) {
+    console.error("Error removing product:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { getFileSignedUrl, uploadFile } from "../utils/r2Service";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
 
@@ -74,7 +75,7 @@ export const getProducts = async (req: Request, res: Response) => {
       });
     });
 
-    res.status(200).json({ ...products, sizes, colors });
+    res.status(200).json({ products, sizes, colors });
   } catch (err) {
     console.error("Error getting products:", err);
     res.status(500).json({ message: err });
@@ -178,6 +179,10 @@ export const removeProduct = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Product removed" });
   } catch (err) {
     console.error("Error removing product:", err);
+    if (err instanceof PrismaClientKnownRequestError && err.code === "P2025") {
+      res.status(404).json({ message: "Product not found" });
+      return;
+    }
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

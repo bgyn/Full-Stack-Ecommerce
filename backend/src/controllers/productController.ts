@@ -2,14 +2,13 @@ import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { deleteFile, getFileSignedUrl, uploadFile } from "../utils/r2Service";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { runInNewContext } from "vm";
 
 const prisma = new PrismaClient();
 
 type Product = {
   name: string;
   description: string;
-  sizes: string[];
+  sizes: string;
   stock: string;
   price: string;
   category: string;
@@ -82,6 +81,11 @@ export const addProduct = async (req: Request, res: Response) => {
     const bucket = "ecommerce";
     const path = "products/images";
 
+    const sizes = product.sizes
+      .split(",")
+      .map((size) => size.trim())
+      .filter((size) => size !== "");
+
     await Promise.all(
       files.map(async (file) => {
         await uploadFile(
@@ -98,7 +102,7 @@ export const addProduct = async (req: Request, res: Response) => {
       data: {
         name: product.name,
         description: product.description,
-        sizes: product.sizes,
+        sizes: sizes,
         stock: parseInt(product.stock, 10),
         price: parseFloat(product.price),
         subCategory: {
@@ -120,8 +124,6 @@ export const addProduct = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({ message: "Product created", newProduct });
-
-    return;
   } catch (err) {
     console.error("Error creating product:", err);
     res.status(500).json({ message: "Internal Server Error" });

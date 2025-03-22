@@ -6,7 +6,16 @@ const prisma = new PrismaClient();
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const categories = await prisma.categories.findMany();
+    const categories = await prisma.categories.findMany({
+      include: {
+        SubCategory: {
+          select: {
+            subCategoryName: true,
+            categoryId: true,
+          },
+        },
+      },
+    });
 
     const bucket = "ecommerce";
 
@@ -59,6 +68,39 @@ export const addCategories = async (req: Request, res: Response) => {
     res.redirect("/category");
   } catch (err) {
     console.error("Error adding category:", err);
+
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addSubCategories = async (req: Request, res: Response) => {
+  try {
+    console.log("addSubCategories");
+    const {
+      name,
+      categoryId,
+    }: {
+      name: string;
+      categoryId: string;
+    } = req.body;
+
+    if (!name || !categoryId) {
+      res
+        .status(400)
+        .json({ message: "Sub Category name and Category Id are required" });
+      return;
+    }
+
+    await prisma.subCategory.create({
+      data: {
+        subCategoryName: name,
+        categoryId: parseInt(categoryId, 10),
+      },
+    });
+
+    res.status(201).json({ message: "Sub Category added successfully" });
+  } catch (err) {
+    console.error("Error adding sub category:", err);
 
     res.status(500).json({ message: "Internal Server Error" });
   }

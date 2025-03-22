@@ -25,6 +25,15 @@ router.get("/category/add", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
   return res.render("addCategories");
 });
 
+router.get(
+  "/subCategory/add",
+  verifyToken,
+  restrictTo(["ADMIN"]),
+  (req, res) => {
+    return res.render("addSubCategories");
+  }
+);
+
 router.get("/users", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
   return res.render("users");
 });

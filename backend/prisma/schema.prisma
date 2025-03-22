@@ -90,21 +90,23 @@ model ShippingAddress {
 }
 
 model Product {
-  id          Int    @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
-  stock       Int
-  sizes       String[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String
+  price         Float
+  stock         Int
+  sizes         String[] @default([])
+  subCategoryId Int
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  categories   Categories[]   @relation("ProductCategories")
-  Review       Review[]
-  images ProductImage[]
-  CartItem     CartItem[]
-  OrderItem    OrderItem[]
+  subCategory SubCategory @relation(fields: [subCategoryId], references: [id])
+
+  Review    Review[]
+  images    ProductImage[]
+  CartItem  CartItem[]
+  OrderItem OrderItem[]
 
   @@map("product")
 }
@@ -112,7 +114,7 @@ model Product {
 model ProductImage {
   id        Int      @id @default(autoincrement())
   productID Int
-  url     String
+  url       String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -149,14 +151,28 @@ model ReviewImages {
 }
 
 model Categories {
-  id            Int       @id @default(autoincrement())
-  categoryName  String    @map("category_name") @unique
-  categoryImage String    @map("category_image")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  products      Product[] @relation("ProductCategories")
+  id            Int           @id @default(autoincrement())
+  categoryName  String        @unique @map("category_name")
+  categoryImage String        @map("category_image")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  SubCategory   SubCategory[]
 
   @@map("categories")
+}
+
+model SubCategory {
+  id              Int      @id @default(autoincrement())
+  productId       Int?
+  categoryId      Int
+  subCategoryName String   @map("sub_category_name")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  category Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Product  Product[]
+
+  @@map("sub_category")
 }
 
 model Cart {

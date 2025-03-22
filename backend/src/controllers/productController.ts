@@ -108,11 +108,12 @@ export const addProduct = async (req: Request, res: Response) => {
         sizes: product.sizes,
         stock: parseInt(product.stock, 10),
         price: parseFloat(product.price),
-        categories: {
-          connect: categories.map((category: string) => ({
-            id: parseInt(category, 10),
-          })),
-        },
+        // categories: {
+        //   connect: categories.map((category: string) => ({
+        //     id: parseInt(category, 10),
+        //   })),
+        // },
+        subCategoryId: parseInt("1", 10),
         images: {
           create: files.map((file) => {
             return {

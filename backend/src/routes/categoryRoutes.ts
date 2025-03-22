@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   addCategories,
+  addSubCategories,
   getCategories,
 } from "../controllers/categoryController";
 import { restrictTo } from "../middelware/authMiddleware";
@@ -16,5 +17,7 @@ router.post(
   upload.single("categoryImage"),
   addCategories
 );
+
+router.post("/subCategory/add", restrictTo(["ADMIN"]), addSubCategories);
 
 export default router;

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { deleteFile, getFileSignedUrl, uploadFile } from "../utils/r2Service";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { runInNewContext } from "vm";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,8 @@ type Product = {
   sizes: string[];
   stock: string;
   price: string;
-  category: string[];
+  category: string;
+  subcategory: string;
 };
 
 const productSelect = {
@@ -26,12 +28,7 @@ const productSelect = {
       productID: true,
     },
   },
-  categories: {
-    select: {
-      id: true,
-      categoryName: true,
-    },
-  },
+  subCategoryId: true,
 };
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -85,10 +82,6 @@ export const addProduct = async (req: Request, res: Response) => {
     const bucket = "ecommerce";
     const path = "products/images";
 
-    const categories = Array.isArray(product.category)
-      ? product.category
-      : [product.category];
-
     await Promise.all(
       files.map(async (file) => {
         await uploadFile(
@@ -108,12 +101,11 @@ export const addProduct = async (req: Request, res: Response) => {
         sizes: product.sizes,
         stock: parseInt(product.stock, 10),
         price: parseFloat(product.price),
-        // categories: {
-        //   connect: categories.map((category: string) => ({
-        //     id: parseInt(category, 10),
-        //   })),
-        // },
-        subCategoryId: parseInt("1", 10),
+        subCategory: {
+          connect: {
+            id: parseInt(product.subcategory, 10),
+          },
+        },
         images: {
           create: files.map((file) => {
             return {

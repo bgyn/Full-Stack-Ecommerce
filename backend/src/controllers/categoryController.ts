@@ -10,6 +10,7 @@ export const getCategories = async (req: Request, res: Response) => {
       include: {
         SubCategory: {
           select: {
+            id: true,
             subCategoryName: true,
             categoryId: true,
           },

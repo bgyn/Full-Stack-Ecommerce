@@ -1,5 +1,6 @@
 import express from "express";
 import { restrictTo, verifyToken } from "../middelware/authMiddleware";
+import { verify } from "crypto";
 
 const router = express.Router();
 
@@ -11,6 +12,10 @@ router.get("/dashboard", verifyToken, restrictTo(["ADMIN"]), (req, res) => {
 
 router.get("/login", (req, res) => {
   return res.render("login");
+});
+
+router.get("/products",verifyToken,restrictTo(["ADMIN"]), (req, res) => {
+  return res.render("products");
 });
 
 router.get("/products/add", verifyToken, restrictTo(["ADMIN"]), (req, res) => {

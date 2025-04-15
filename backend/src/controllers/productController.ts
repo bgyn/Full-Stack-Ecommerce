@@ -21,6 +21,7 @@ const productSelect = {
   description: true,
   sizes: true,
   stock: true,
+  price :true,
   images: {
     select: {
       url: true,

@@ -1,5 +1,5 @@
 import 'package:ecommerce/config/theme/theme.dart';
-import 'package:ecommerce/features/auth/presentation/screens/login_screen.dart';
+import 'package:ecommerce/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +19,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Ecommerce',
       theme: getThemeData(context),
-      home: const LoginScreen(),
+      home: const ForgotPasswordScreen(),
     );
   }
 }

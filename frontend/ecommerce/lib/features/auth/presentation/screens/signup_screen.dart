@@ -1,4 +1,5 @@
 import 'package:ecommerce/core/extension/extension.dart';
+import 'package:ecommerce/core/widgets/primary_button.dart';
 import 'package:ecommerce/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _formkey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -27,6 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       body: SafeArea(
         child: Form(
+          key: _formkey,
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -53,7 +56,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 0.02.h(context)),
+                SizedBox(height: 0.01.h(context)),
                 //Email
                 AuthTextField(
                   controller: _emailController,
@@ -72,7 +75,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 0.02.h(context)),
+                SizedBox(height: 0.01.h(context)),
                 //Password
                 AuthTextField(
                   controller: _passwordController,
@@ -95,6 +98,27 @@ class _SignupScreenState extends State<SignupScreen> {
                     return null;
                   },
                 ),
+                SizedBox(height: 0.01.h(context)),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "Already have an account?",
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ),
+                ),
+                //singnup button
+                SizedBox(height: 0.04.h(context)),
+                PrimaryButton(
+                  title: "Sign up",
+                  onTap: () {
+                    if (_formkey.currentState!.validate()) {
+                    } else {}
+                  },
+                ),
+              
               ],
             ),
           ),

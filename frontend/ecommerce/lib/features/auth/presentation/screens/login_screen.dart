@@ -1,7 +1,9 @@
+import 'package:ecommerce/core/constant/app_route.dart';
 import 'package:ecommerce/core/extension/extension.dart';
 import 'package:ecommerce/core/widgets/primary_button.dart';
 import 'package:ecommerce/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -80,7 +82,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.push(AppRoute.forgotPassword);
+                    },
                     child: Text(
                       "Forgot your password?",
                       style: Theme.of(context).textTheme.labelLarge,

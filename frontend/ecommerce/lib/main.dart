@@ -1,5 +1,5 @@
+import 'package:ecommerce/config/router/app_router.dart';
 import 'package:ecommerce/config/theme/theme.dart';
-import 'package:ecommerce/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -16,10 +16,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Ecommerce',
       theme: getThemeData(context),
-      home: const ForgotPasswordScreen(),
+      routerConfig: routerConfig,
+      // routeInformationParser: routerConfig.routeInformationParser,
+      // routerDelegate: routerConfig.routerDelegate,
     );
   }
 }
